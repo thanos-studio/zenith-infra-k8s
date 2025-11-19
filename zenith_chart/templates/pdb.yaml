@@ -1,0 +1,15 @@
+{{- if .Values.pdb.enabled }}
+{{- $namespace := include "zenith_app.namespace" . -}}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "zenith_app.fullname" . }}
+  namespace: {{ $namespace }}
+  labels:
+    {{- include "zenith_app.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "zenith_app.selectorLabels" . | nindent 6 }}
+  minAvailable: {{ .Values.pdb.minAvailable }}
+{{- end }}

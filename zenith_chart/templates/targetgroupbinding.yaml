@@ -1,0 +1,22 @@
+{{- if .Values.targetGroupBinding.enabled }}
+{{- $namespace := include "zenith_app.namespace" . -}}
+{{- $binding := .Values.targetGroupBinding -}}
+{{- $bindingName := default (printf "%s-tgb" (include "zenith_app.fullname" .)) $binding.name -}}
+apiVersion: elbv2.k8s.aws/v1beta1
+kind: TargetGroupBinding
+metadata:
+  name: {{ $bindingName }}
+  namespace: {{ $namespace }}
+  labels:
+    {{- include "zenith_app.labels" . | nindent 4 }}
+spec:
+  serviceRef:
+    name: {{ include "zenith_app.activeServiceName" . }}
+    port: {{ default .Values.service.port $binding.servicePort }}
+  targetGroupARN: {{ required "targetGroupBinding.targetGroupARN is required" $binding.targetGroupARN }}
+  targetType: {{ $binding.targetType }}
+  {{- with $binding.networking }}
+  networking:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

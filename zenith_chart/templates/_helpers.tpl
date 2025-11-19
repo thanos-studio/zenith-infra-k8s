@@ -1,16 +1,8 @@
-{{/*
-Expand the name of the chart.
-*/}}
-{{- define "zenith_system.name" -}}
+{{- define "zenith_app.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
-{{/*
-Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains chart name it will be used as a full name.
-*/}}
-{{- define "zenith_system.fullname" -}}
+{{- define "zenith_app.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -23,40 +15,44 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 {{- end }}
 
-{{/*
-Create chart name and version as used by the chart label.
-*/}}
-{{- define "zenith_system.chart" -}}
+{{- define "zenith_app.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
-{{/*
-Common labels
-*/}}
-{{- define "zenith_system.labels" -}}
-helm.sh/chart: {{ include "zenith_system.chart" . }}
-{{ include "zenith_system.selectorLabels" . }}
+{{- define "zenith_app.labels" -}}
+helm.sh/chart: {{ include "zenith_app.chart" . }}
+{{ include "zenith_app.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
-{{/*
-Selector labels
-*/}}
-{{- define "zenith_system.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "zenith_system.name" . }}
+{{- define "zenith_app.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "zenith_app.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "zenith_system.serviceAccountName" -}}
+{{- define "zenith_app.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "zenith_system.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "zenith_app.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
+{{- end }}
+
+{{- define "zenith_app.namespace" -}}
+{{- if .Values.namespace | trim }}
+{{- .Values.namespace }}
+{{- else }}
+{{- .Release.Namespace }}
+{{- end }}
+{{- end }}
+
+{{- define "zenith_app.activeServiceName" -}}
+{{- printf "%s-%s" (include "zenith_app.fullname" .) (default "active" .Values.service.activeSuffix) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{- define "zenith_app.previewServiceName" -}}
+{{- printf "%s-%s" (include "zenith_app.fullname" .) (default "preview" .Values.service.previewSuffix) | trunc 63 | trimSuffix "-" }}
 {{- end }}

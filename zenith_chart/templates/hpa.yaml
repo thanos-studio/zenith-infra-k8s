@@ -1,15 +1,17 @@
 {{- if .Values.autoscaling.enabled }}
+{{- $namespace := include "zenith_app.namespace" . -}}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "zenith_system.fullname" . }}
+  name: {{ include "zenith_app.fullname" . }}
+  namespace: {{ $namespace }}
   labels:
-    {{- include "zenith_system.labels" . | nindent 4 }}
+    {{- include "zenith_app.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
-    name: {{ include "zenith_system.fullname" . }}
+    apiVersion: argoproj.io/v1alpha1
+    kind: Rollout
+    name: {{ include "zenith_app.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:

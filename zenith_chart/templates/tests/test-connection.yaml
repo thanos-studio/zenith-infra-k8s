@@ -1,9 +1,11 @@
+{{- $namespace := include "zenith_app.namespace" . -}}
 apiVersion: v1
 kind: Pod
 metadata:
-  name: "{{ include "zenith_system.fullname" . }}-test-connection"
+  name: "{{ include "zenith_app.fullname" . }}-test-connection"
+  namespace: {{ $namespace }}
   labels:
-    {{- include "zenith_system.labels" . | nindent 4 }}
+    {{- include "zenith_app.labels" . | nindent 4 }}
   annotations:
     "helm.sh/hook": test
 spec:
@@ -11,5 +13,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ include "zenith_system.fullname" . }}:{{ .Values.service.port }}']
+      args: ['{{ include "zenith_app.activeServiceName" . }}:{{ .Values.service.port }}']
   restartPolicy: Never

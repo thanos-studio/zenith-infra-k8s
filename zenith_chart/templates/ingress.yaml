@@ -1,10 +1,12 @@
 {{- if .Values.ingress.enabled -}}
+{{- $namespace := include "zenith_app.namespace" . -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "zenith_system.fullname" . }}
+  name: {{ include "zenith_app.fullname" . }}
+  namespace: {{ $namespace }}
   labels:
-    {{- include "zenith_system.labels" . | nindent 4 }}
+    {{- include "zenith_app.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -35,7 +37,7 @@ spec:
             {{- end }}
             backend:
               service:
-                name: {{ include "zenith_system.fullname" $ }}
+                name: {{ include "zenith_app.activeServiceName" $ }}
                 port:
                   number: {{ $.Values.service.port }}
           {{- end }}
