@@ -1,15 +1,46 @@
+{{- $namespace := include "news_app.namespace" . -}}
+{{- $activeServiceName := include "news_app.activeServiceName" . -}}
+{{- $previewServiceName := include "news_app.previewServiceName" . -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "news_app.fullname" . }}
+  name: {{ $activeServiceName }}
+  namespace: {{ $namespace }}
   labels:
     {{- include "news_app.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
+    - name: http
+      port: {{ .Values.service.port }}
       targetPort: http
       protocol: TCP
-      name: http
   selector:
     {{- include "news_app.selectorLabels" . | nindent 4 }}
+{{- if .Values.service.previewEnabled }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $previewServiceName }}
+  namespace: {{ $namespace }}
+  labels:
+    {{- include "news_app.labels" . | nindent 4 }}
+  {{- with .Values.service.previewAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+  selector:
+    {{- include "news_app.selectorLabels" . | nindent 4 }}
+{{- end }}

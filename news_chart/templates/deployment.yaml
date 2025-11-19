@@ -1,13 +1,16 @@
-apiVersion: apps/v1
-kind: Deployment
+{{- $namespace := include "news_app.namespace" . -}}
+{{- $fullName := include "news_app.fullname" . -}}
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
-  name: {{ include "news_app.fullname" . }}
+  name: {{ $fullName }}
+  namespace: {{ $namespace }}
   labels:
     {{- include "news_app.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{- end }}
+  revisionHistoryLimit: {{ .Values.rollout.revisionHistoryLimit }}
+  progressDeadlineSeconds: {{ .Values.rollout.progressDeadlineSeconds }}
   selector:
     matchLabels:
       {{- include "news_app.selectorLabels" . | nindent 6 }}
@@ -44,6 +47,11 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port }}
               protocol: TCP
+          {{- if .Values.externalSecret.enabled }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.externalSecret.target.name }}
+          {{- end }}
           {{- with .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml . | nindent 12 }}
@@ -76,3 +84,12 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+  strategy:
+    blueGreen:
+      activeService: {{ include "news_app.activeServiceName" . }}
+      {{- if .Values.service.previewEnabled }}
+      previewService: {{ include "news_app.previewServiceName" . }}
+      {{- end }}
+      autoPromotionEnabled: {{ .Values.rollout.strategy.blueGreen.autoPromotionEnabled }}
+      autoPromotionSeconds: {{ .Values.rollout.strategy.blueGreen.autoPromotionSeconds }}
+      scaleDownDelaySeconds: {{ .Values.rollout.strategy.blueGreen.scaleDownDelaySeconds }}

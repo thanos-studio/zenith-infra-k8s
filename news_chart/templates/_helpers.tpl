@@ -1,15 +1,7 @@
-{{/*
-Expand the name of the chart.
-*/}}
 {{- define "news_app.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
-{{/*
-Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-If release name contains chart name it will be used as a full name.
-*/}}
 {{- define "news_app.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
@@ -23,16 +15,10 @@ If release name contains chart name it will be used as a full name.
 {{- end }}
 {{- end }}
 
-{{/*
-Create chart name and version as used by the chart label.
-*/}}
 {{- define "news_app.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
-{{/*
-Common labels
-*/}}
 {{- define "news_app.labels" -}}
 helm.sh/chart: {{ include "news_app.chart" . }}
 {{ include "news_app.selectorLabels" . }}
@@ -42,21 +28,31 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
-{{/*
-Selector labels
-*/}}
 {{- define "news_app.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "news_app.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
-{{/*
-Create the name of the service account to use
-*/}}
 {{- define "news_app.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
 {{- default (include "news_app.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
+{{- end }}
+
+{{- define "news_app.namespace" -}}
+{{- if .Values.namespace }}
+{{- .Values.namespace }}
+{{- else }}
+{{- .Release.Namespace }}
+{{- end }}
+{{- end }}
+
+{{- define "news_app.activeServiceName" -}}
+{{- printf "%s-%s" (include "news_app.fullname" .) (default "active" .Values.service.activeSuffix) | trunc 63 | trimSuffix "-" }}
+{{- end }}
+
+{{- define "news_app.previewServiceName" -}}
+{{- printf "%s-%s" (include "news_app.fullname" .) (default "preview" .Values.service.previewSuffix) | trunc 63 | trimSuffix "-" }}
 {{- end }}

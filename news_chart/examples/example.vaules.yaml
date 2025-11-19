@@ -1,0 +1,55 @@
+namespace: zenith-news
+
+image:
+  repository: 123456789012.dkr.ecr.ap-northeast-2.amazonaws.com/news
+  tag: "b239nd"
+
+service:
+  type: LoadBalancer
+  port: 8080
+  activeSuffix: stable
+  previewSuffix: canary
+  previewEnabled: true
+
+rollout:
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 900
+  strategy:
+    blueGreen:
+      autoPromotionEnabled: true
+      autoPromotionSeconds: 30
+      scaleDownDelaySeconds: 60
+
+externalSecret:
+  enabled: true
+  name: news-app-config
+  refreshInterval: 5m
+  secretStoreRef:
+    name: aws-secretsmanager
+    kind: SecretStore
+  target:
+    name: news-app-env
+    creationPolicy: Owner
+    deletionPolicy: Delete
+  data:
+    - secretKey: DB_USER
+      remoteRef:
+        key: zenith-news
+        property: DB_USER
+    - secretKey: DB_PASSWORD
+      remoteRef:
+        key: zenith-news
+        property: DB_PASSWORD
+    - secretKey: DB_URL
+      remoteRef:
+        key: zenith-news
+        property: DB_URL
+
+pdb:
+  enabled: true
+  minAvailable: 1
+
+targetGroupBinding:
+  enabled: true
+  targetGroupARN: arn:aws:elasticloadbalancing:ap-northeast-2:123456789012:targetgroup/zenith-news/abc1234567890
+  servicePort: 8080

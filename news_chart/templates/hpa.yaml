@@ -1,14 +1,16 @@
 {{- if .Values.autoscaling.enabled }}
+{{- $namespace := include "news_app.namespace" . -}}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "news_app.fullname" . }}
+  namespace: {{ $namespace }}
   labels:
     {{- include "news_app.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
-    apiVersion: apps/v1
-    kind: Deployment
+    apiVersion: argoproj.io/v1alpha1
+    kind: Rollout
     name: {{ include "news_app.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}

@@ -1,7 +1,9 @@
+{{- $namespace := include "news_app.namespace" . -}}
 apiVersion: v1
 kind: Pod
 metadata:
   name: "{{ include "news_app.fullname" . }}-test-connection"
+  namespace: {{ $namespace }}
   labels:
     {{- include "news_app.labels" . | nindent 4 }}
   annotations:
@@ -11,5 +13,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ include "news_app.fullname" . }}:{{ .Values.service.port }}']
+      args: ['{{ include "news_app.activeServiceName" . }}:{{ .Values.service.port }}']
   restartPolicy: Never

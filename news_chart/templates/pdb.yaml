@@ -1,0 +1,15 @@
+{{- if .Values.pdb.enabled }}
+{{- $namespace := include "news_app.namespace" . -}}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "news_app.fullname" . }}
+  namespace: {{ $namespace }}
+  labels:
+    {{- include "news_app.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "news_app.selectorLabels" . | nindent 6 }}
+  minAvailable: {{ .Values.pdb.minAvailable }}
+{{- end }}
