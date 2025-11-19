@@ -1,0 +1,15 @@
+# 환경 변수 CLUSTER_NAME, AWS_ACCOUNT_ID를 지정한 뒤 envsubst로 적용하세요.
+# 예: CLUSTER_NAME=my-eks AWS_ACCOUNT_ID=111122223333 envsubst < default-awsnodetemplate.yaml | kubectl apply -f -
+apiVersion: karpenter.k8s.aws/v1alpha1
+kind: AWSNodeTemplate
+metadata:
+  name: default
+spec:
+  amiFamily: AL2
+  instanceProfile: KarpenterNodeInstanceProfile-${CLUSTER_NAME}
+  subnetSelector:
+    karpenter.sh/discovery: ${CLUSTER_NAME}
+  securityGroupSelector:
+    karpenter.sh/discovery: ${CLUSTER_NAME}
+  tags:
+    karpenter.sh/discovery: ${CLUSTER_NAME}

@@ -31,4 +31,5 @@ helm upgrade -i aws-load-balancer-controller eks/aws-load-balancer-controller \
   --set serviceAccount.create=false \
   --set serviceAccount.name=aws-load-balancer-controller \
   --set region=$region \
-  --set vpcId=$vpc_id
+  --set vpcId=$vpc_id \
+  --set enableServiceMutatorWebhook=false
