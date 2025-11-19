@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: zenith-api
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: zenith-api
+    app.kubernetes.io/part-of: zenith
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/thanos-studio/zenith-infra-k8s
+    targetRevision: HEAD
+    path: zenith_chart
+    helm:
+      releaseName: zenith-api
+      valueFiles:
+        - argo/zenith/api.values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: zenith-api
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

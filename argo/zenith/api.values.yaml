@@ -4,6 +4,7 @@ replicaCount: 4
 image:
   repository: 123456789012.dkr.ecr.ap-northeast-2.amazonaws.com/api
   tag: "cm9w21"
+  pullPolicy: IfNotPresent
 
 service:
   type: ClusterIP
@@ -12,7 +13,7 @@ service:
 
 resources:
   requests:
-    cpu: 200m
+    cpu: 250m
     memory: 512Mi
   limits:
     cpu: 1
@@ -22,22 +23,28 @@ livenessProbe:
   httpGet:
     path: /health
     port: http
+  initialDelaySeconds: 15
+  periodSeconds: 10
+  timeoutSeconds: 5
 
 readinessProbe:
   httpGet:
     path: /ready
     port: http
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
 
 autoscaling:
   enabled: true
-  minReplicas: 4
-  maxReplicas: 20
-  targetCPUUtilizationPercentage: 70
-  targetMemoryUtilizationPercentage: 70
+  minReplicas: 2
+  maxReplicas: 8
+  targetCPUUtilizationPercentage: 65
+  targetMemoryUtilizationPercentage: 75
 
 pdb:
   enabled: true
-  minAvailable: 3
+  minAvailable: 1
 
 rollout:
   revisionHistoryLimit: 5
@@ -68,6 +75,16 @@ externalSecret:
       remoteRef:
         key: zenith-api
         property: DB_PASSWORD
+    - secretKey: REDIS_URL
+      remoteRef:
+        key: zenith-api
+        property: REDIS_URL
+
+targetGroupBinding:
+  enabled: true
+  targetGroupARN: arn:aws:elasticloadbalancing:ap-northeast-2:123456789012:targetgroup/zenith-api/abcd5678efgh9012
+  servicePort: 8080
+  targetType: ip
 
 nodeSelector:
   role: worker

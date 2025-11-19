@@ -4,6 +4,7 @@ replicaCount: 3
 image:
   repository: 123456789012.dkr.ecr.ap-northeast-2.amazonaws.com/dashboard
   tag: "zxlckl"
+  pullPolicy: IfNotPresent
 
 service:
   type: LoadBalancer
@@ -14,17 +15,33 @@ service:
 
 resources:
   requests:
-    cpu: 150m
+    cpu: 200m
     memory: 256Mi
   limits:
-    cpu: 500m
+    cpu: 600m
     memory: 512Mi
+
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  timeoutSeconds: 3
+
+readinessProbe:
+  httpGet:
+    path: /readyz
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 3
 
 autoscaling:
   enabled: true
   minReplicas: 3
-  maxReplicas: 10
-  targetCPUUtilizationPercentage: 60
+  maxReplicas: 12
+  targetCPUUtilizationPercentage: 55
 
 pdb:
   enabled: true
@@ -36,18 +53,18 @@ rollout:
   strategy:
     blueGreen:
       autoPromotionEnabled: true
-      autoPromotionSeconds: 15
+      autoPromotionSeconds: 20
       scaleDownDelaySeconds: 60
 
 externalSecret:
   enabled: true
-  name: dashboard-config
+  name: dash-config
   refreshInterval: 5m
   secretStoreRef:
     name: aws-secretsmanager
     kind: SecretStore
   target:
-    name: dashboard-env
+    name: dash-env
     creationPolicy: Owner
     deletionPolicy: Delete
   data:
@@ -59,8 +76,13 @@ externalSecret:
       remoteRef:
         key: zenith-dashboard
         property: OAUTH_CLIENT_SECRET
+    - secretKey: API_BASE_URL
+      remoteRef:
+        key: zenith-dashboard
+        property: API_BASE_URL
 
 targetGroupBinding:
   enabled: true
-  targetGroupARN: arn:aws:elasticloadbalancing:ap-northeast-2:123456789012:targetgroup/zenith-dashboard/abcd1234efgh5678
+  targetGroupARN: arn:aws:elasticloadbalancing:ap-northeast-2:123456789012:targetgroup/zenith-dashboard/efgh9012ijkl3456
   servicePort: 80
+  targetType: ip
