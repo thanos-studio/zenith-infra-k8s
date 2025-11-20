@@ -62,24 +62,16 @@ externalSecret:
   refreshInterval: 5m
   secretStoreRef:
     name: aws-secretsmanager
-    kind: SecretStore
+    kind: ClusterSecretStore
   target:
     name: dash-env
     creationPolicy: Owner
     deletionPolicy: Delete
   data:
-    - secretKey: OAUTH_CLIENT_ID
+    - secretKey: GITHUB_TOKEN
       remoteRef:
-        key: zenith-dashboard
-        property: OAUTH_CLIENT_ID
-    - secretKey: OAUTH_CLIENT_SECRET
-      remoteRef:
-        key: zenith-dashboard
-        property: OAUTH_CLIENT_SECRET
-    - secretKey: API_BASE_URL
-      remoteRef:
-        key: zenith-dashboard
-        property: API_BASE_URL
+        key: zenith-prod-github
+        property: GITHUB_TOKEN
 
 targetGroupBinding:
   enabled: true

@@ -64,7 +64,7 @@ externalSecret:
   refreshInterval: 5m
   secretStoreRef:
     name: aws-secretsmanager
-    kind: SecretStore
+    kind: ClusterSecretStore
   target:
     name: news-env
     creationPolicy: Owner
@@ -72,16 +72,24 @@ externalSecret:
   data:
     - secretKey: DB_USER
       remoteRef:
-        key: zenith-news
+        key: zenith-prod-mysql
         property: DB_USER
     - secretKey: DB_PASSWORD
       remoteRef:
-        key: zenith-news
+        key: zenith-prod-mysql
         property: DB_PASSWORD
-    - secretKey: REDIS_URL
+    - secretKey: DB_URL
       remoteRef:
-        key: zenith-news
-        property: REDIS_URL
+        key: zenith-prod-mysql
+        property: DB_URL
+    - secretKey: REDIS_AUTH_TOKEN
+      remoteRef:
+        key: zenith-prod-redis
+        property: REDIS_AUTH_TOKEN
+    - secretKey: REDIS_ENDPOINT
+      remoteRef:
+        key: zenith-prod-redis
+        property: REDIS_ENDPOINT
 
 nodeSelector:
   role: worker
