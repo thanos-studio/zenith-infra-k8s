@@ -5,7 +5,7 @@ kind: AWSNodeTemplate
 metadata:
   name: default
 spec:
-  amiFamily: AL2
+  amiFamily: AL2023
   instanceProfile: KarpenterNodeInstanceProfile-${CLUSTER_NAME}
   subnetSelector:
     karpenter.sh/discovery: ${CLUSTER_NAME}
